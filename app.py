@@ -2,11 +2,6 @@ import streamlit as st
 from fastai.vision.all import *
 from PIL import Image
 import io
-import pathlib
-
-# Fix for Windows path compatibility
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath if hasattr(pathlib, 'WindowsPath') else pathlib.PosixPath
 
 # Page config
 st.set_page_config(
@@ -15,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# Load model
+# Load model (cached so it loads only once)
 @st.cache_resource
 def load_model():
     return load_learner('model.pkl')
@@ -33,27 +28,27 @@ if uploaded_file is not None:
     # Display image
     image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Image', use_column_width=True)
-    
+
     # Predict button
     if st.button('Classify'):
         with st.spinner('Classifying...'):
             try:
-                # Convert to PILImage properly for fastai
+                # Create fastai image from the uploaded file
                 img = PILImage.create(uploaded_file)
-                
+
                 # Get prediction
                 pred, pred_idx, probs = learn.predict(img)
-                
+
                 # Display results
                 st.success(f"**Prediction: {pred}**")
                 st.write(f"**Confidence: {probs[pred_idx]:.2%}**")
-                
-                # Show probabilities
+
+                # Show probabilities for each class
                 st.write("### Probabilities:")
                 for i, cat in enumerate(learn.dls.vocab):
                     st.write(f"- {cat}: {probs[i]:.2%}")
-                    
+
             except Exception as e:
-                st.error(f"Error during classification: {str(e)}")
+                st.error(f"Error during classification: {e}")
                 st.write("Please try uploading a different image.")
 
