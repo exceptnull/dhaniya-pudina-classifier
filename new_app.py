@@ -28,7 +28,7 @@ uploaded_file = st.file_uploader("Choose an image", type=['jpg', 'jpeg', 'png'])
 if uploaded_file is not None:
     # Display image
     image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image', use_container_width=True)
+    st.image(image, caption='Uploaded Image', width='stretch')
     
     # Predict button
     if st.button('Classify'):
@@ -41,10 +41,9 @@ if uploaded_file is not None:
                 
                 # Get prediction
                 pred, idx, probs = learn.predict(temp_file_path)
-                print(pred) # Print the pred variable
                 
                 # Display results
-                st.success(f"**Prediction: {pred}**")
+                st.success(f"**Prediction: {pred[0]}**")
                 st.write(f"**Confidence: {probs[idx]:.2%}**")
                 
                 # Show probabilities
