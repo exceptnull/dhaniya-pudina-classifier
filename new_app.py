@@ -40,10 +40,12 @@ if uploaded_file is not None:
                     f.write(uploaded_file.getbuffer())
                 
                 # Get prediction
-                pred, idx, probs = learn.predict(temp_file_path)
+                img = PILImage.create(temp_file_path)
+                print(type(img))
+                pred, idx, probs = learn.predict(img)
                 
                 # Display results
-                st.success(f"**Prediction: {pred[0]}**")
+                st.success(f"**Prediction: {pred}**")
                 st.write(f"**Confidence: {probs[idx]:.2%}**")
                 
                 # Show probabilities
