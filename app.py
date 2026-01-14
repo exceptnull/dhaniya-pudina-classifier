@@ -34,21 +34,19 @@ if uploaded_file is not None:
     if st.button('Classify'):
         with st.spinner('Classifying...'):
             try:
-                # Create a temporary file path
-                temp_file_path = "temp.jpg"
-                with open(temp_file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
+                # Create PILImage from the uploaded file's buffer
+                img = PILImage.create(uploaded_file.getbuffer())
                 
                 # Get prediction
-                pred, idx, probs = learn.predict(temp_file_path)
+                pred, pred_idx, probs = learn.predict(img)
                 
                 # Display results
                 st.success(f"**Prediction: {pred}**")
-                st.write(f"**Confidence: {probs[idx]:.2%}**")
+                st.write(f"**Confidence: {probs[pred_idx]:.2%}**")
                 
                 # Show probabilities
                 st.write("### Probabilities:")
-                for i, cat in enumerate(categories):
+                for i, cat in enumerate(learn.dls.vocab):
                     st.write(f"- {cat}: {probs[i]:.2%}")
 
             except Exception as e:
