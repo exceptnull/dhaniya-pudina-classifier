@@ -33,17 +33,22 @@ if uploaded_file is not None:
     if st.button('Classify'):
         with st.spinner('Classifying...'):
             try:
+                # Create a new dataloader with the uploaded image
+                dl = learn.dls.test_dl([image], with_labels=False)
+                
                 # Get prediction
-                pred, pred_idx, probs = learn.predict(image)
+                preds, _ = learn.get_preds(dl=dl)
+                pred_idx = preds.argmax()
+                pred = learn.dls.vocab[pred_idx]
                 
                 # Display results
                 st.success(f"**Prediction: {pred}**")
-                st.write(f"**Confidence: {probs[pred_idx]:.2%}**")
+                st.write(f"**Confidence: {preds[0][pred_idx]:.2%}**")
                 
                 # Show probabilities
                 st.write("### Probabilities:")
                 for i, cat in enumerate(learn.dls.vocab):
-                    st.write(f"- {cat}: {probs[i]:.2%}")
+                    st.write(f"- {cat}: {preds[0][i]:.2%}")
 
             except Exception as e:
                 st.error(e)
