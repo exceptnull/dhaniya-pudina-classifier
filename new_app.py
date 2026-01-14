@@ -1,6 +1,7 @@
 import streamlit as st
 from fastai.vision.all import *
 from PIL import Image
+import pathlib
 
 # Page config
 st.set_page_config(
@@ -32,10 +33,14 @@ if uploaded_file is not None:
     # Predict button
     if st.button('Classify'):
         with st.spinner('Classifying...'):
-            # Convert to fastai format
             try:
-                img = PILImage.create(uploaded_file)
-                pred, idx, probs = learn.predict(img)
+                # Create a temporary file path
+                temp_file_path = "temp.jpg"
+                with open(temp_file_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                
+                # Get prediction
+                pred, idx, probs = learn.predict(temp_file_path)
                 
                 # Display results
                 st.success(f"**Prediction: {pred}**")
@@ -45,5 +50,6 @@ if uploaded_file is not None:
                 st.write("### Probabilities:")
                 for i, cat in enumerate(categories):
                     st.write(f"- {cat}: {probs[i]:.2%}")
+
             except Exception as e:
                 st.error(e)
