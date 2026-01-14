@@ -16,7 +16,6 @@ def load_model():
     return load_learner('model.pkl')
 
 learn = load_model()
-categories = ('Dhaniya (Coriander)', 'Pudina (Mint)')
 
 # UI
 st.title("🌿 Dhaniya - Pudina Classifier")
@@ -34,11 +33,8 @@ if uploaded_file is not None:
     if st.button('Classify'):
         with st.spinner('Classifying...'):
             try:
-                # Create PILImage from the uploaded file's buffer
-                img = PILImage.create(uploaded_file.getbuffer())
-                
                 # Get prediction
-                pred, pred_idx, probs = learn.predict(img)
+                pred, pred_idx, probs = learn.predict(image)
                 
                 # Display results
                 st.success(f"**Prediction: {pred}**")
