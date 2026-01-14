@@ -10,12 +10,8 @@ st.set_page_config(
     layout="centered"
 )
 
-# Load model (cached to avoid reloading)
-@st.cache_resource
-def load_model():
-    return load_learner('model.pkl')
-
-learn = load_model()
+# Load model
+learn = load_learner('model.pkl')
 
 # UI
 st.title("🌿 Dhaniya - Pudina Classifier")
@@ -33,22 +29,20 @@ if uploaded_file is not None:
     if st.button('Classify'):
         with st.spinner('Classifying...'):
             try:
-                # Create a new dataloader with the uploaded image
-                dl = learn.dls.test_dl([image], with_labels=False)
-                
+                # Create PILImage from the uploaded file's bytes
+                img = PILImage.create(uploaded_file.read())
+
                 # Get prediction
-                preds, _ = learn.get_preds(dl=dl)
-                pred_idx = preds.argmax()
-                pred = learn.dls.vocab[pred_idx]
+                pred, pred_idx, probs = learn.predict(img)
                 
                 # Display results
                 st.success(f"**Prediction: {pred}**")
-                st.write(f"**Confidence: {preds[0][pred_idx]:.2%}**")
+                st.write(f"**Confidence: {probs[pred_idx]:.2%}**")
                 
                 # Show probabilities
                 st.write("### Probabilities:")
                 for i, cat in enumerate(learn.dls.vocab):
-                    st.write(f"- {cat}: {preds[0][i]:.2%}")
+                    st.write(f"- {cat}: {probs[i]:.2%}")
 
             except Exception as e:
                 st.error(e)
