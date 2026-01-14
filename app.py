@@ -1,6 +1,7 @@
 import streamlit as st
 from fastai.vision.all import *
 from PIL import Image
+import io
 import pathlib
 
 # Page config
@@ -21,17 +22,20 @@ st.write("Upload a photo of Dhaniya (Coriander) or Pudina (Mint) to classify it.
 uploaded_file = st.file_uploader("Choose an image", type=['jpg', 'jpeg', 'png'])
 
 if uploaded_file is not None:
+    # To read file as bytes:
+    bytes_data = uploaded_file.getvalue()
+    # To buffer image for prediction
+    img = PILImage.create(bytes_data)
+
+
     # Display image
-    image = Image.open(uploaded_file)
+    image = Image.open(io.BytesIO(bytes_data))
     st.image(image, caption='Uploaded Image', width='stretch')
     
     # Predict button
     if st.button('Classify'):
         with st.spinner('Classifying...'):
             try:
-                # Create PILImage from the uploaded file's bytes
-                img = PILImage.create(uploaded_file.read())
-
                 # Get prediction
                 pred, pred_idx, probs = learn.predict(img)
                 
