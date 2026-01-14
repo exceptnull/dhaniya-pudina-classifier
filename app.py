@@ -4,6 +4,10 @@ from PIL import Image
 import io
 import pathlib
 
+# Fix for Windows path compatibility
+temp = pathlib.PosixPath
+pathlib.PosixPath = pathlib.WindowsPath if hasattr(pathlib, 'WindowsPath') else pathlib.PosixPath
+
 # Page config
 st.set_page_config(
     page_title="Dhaniya-Pudina Classifier",
@@ -12,7 +16,11 @@ st.set_page_config(
 )
 
 # Load model
-learn = load_learner('model.pkl')
+@st.cache_resource
+def load_model():
+    return load_learner('model.pkl')
+
+learn = load_model()
 
 # UI
 st.title("🌿 Dhaniya - Pudina Classifier")
@@ -22,20 +30,17 @@ st.write("Upload a photo of Dhaniya (Coriander) or Pudina (Mint) to classify it.
 uploaded_file = st.file_uploader("Choose an image", type=['jpg', 'jpeg', 'png'])
 
 if uploaded_file is not None:
-    # To read file as bytes:
-    bytes_data = uploaded_file.getvalue()
-    # To buffer image for prediction
-    img = PILImage.create(bytes_data)
-
-
     # Display image
-    image = Image.open(io.BytesIO(bytes_data))
-    st.image(image, caption='Uploaded Image', width='stretch')
+    image = Image.open(uploaded_file)
+    st.image(image, caption='Uploaded Image', use_column_width=True)
     
     # Predict button
     if st.button('Classify'):
         with st.spinner('Classifying...'):
             try:
+                # Convert to PILImage properly for fastai
+                img = PILImage.create(uploaded_file)
+                
                 # Get prediction
                 pred, pred_idx, probs = learn.predict(img)
                 
@@ -47,6 +52,8 @@ if uploaded_file is not None:
                 st.write("### Probabilities:")
                 for i, cat in enumerate(learn.dls.vocab):
                     st.write(f"- {cat}: {probs[i]:.2%}")
-
+                    
             except Exception as e:
-                st.error(e)
+                st.error(f"Error during classification: {str(e)}")
+                st.write("Please try uploading a different image.")
+
