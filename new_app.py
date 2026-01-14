@@ -41,6 +41,7 @@ if uploaded_file is not None:
                 
                 # Get prediction
                 pred, idx, probs = learn.predict(temp_file_path)
+                print(pred) # Print the pred variable
                 
                 # Display results
                 st.success(f"**Prediction: {pred}**")
